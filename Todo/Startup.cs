@@ -10,6 +10,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Todo.Services;
 using Todo.Interface;
+using Services;
+using Todo.Models;
 
 namespace Todo
 {
@@ -41,6 +43,8 @@ namespace Todo
 
             services.AddControllers();
             services.AddScoped<IGravatarAPI, GravatarAPI>();
+            services.AddMemoryCache();
+            services.AddScoped<ICacheManagement<UserModel>, CacheManagement<UserModel>>();
 
             services.AddAuthorization(options =>
             {

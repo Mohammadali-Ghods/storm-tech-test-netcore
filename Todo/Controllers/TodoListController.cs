@@ -21,13 +21,16 @@ namespace Todo.Controllers
         private readonly ApplicationDbContext dbContext;
         private readonly IUserStore<IdentityUser> userStore;
         private readonly IGravatarAPI gravatarAPI;
+        private readonly ICacheManagement<UserModel> cacheManagement;
 
         public TodoListController(ApplicationDbContext dbContext, IUserStore<IdentityUser> userStore, IGravatarAPI gravatarAPI
+            , ICacheManagement<UserModel> cacheManagement
             )
         {
             this.dbContext = dbContext;
             this.userStore = userStore;
             this.gravatarAPI = gravatarAPI;
+            this.cacheManagement = cacheManagement;
         }
 
         public IActionResult Index()
@@ -77,16 +80,46 @@ namespace Todo.Controllers
             var distinctItems = input.Items.Select(x => x.ResponsibleParty).Distinct();
             List<UserModel> distinctObject = new List<UserModel>();
 
+
             foreach (var item in distinctItems)
             {
-                var result = await gravatarAPI.Get(item.Email);
-                if (result != null)
+                var cache = await cacheManagement.GetSingleCache(item.Email);
+
+                if (cache != null)
+                {
                     distinctObject.Add(new UserModel()
                     {
-                        UserDisplayName = result.entry[0].displayName,
-                        UserImage = result.entry[0].thumbnailUrl,
+                        UserDisplayName = cache.UserDisplayName,
+                        UserImage = cache.UserImage,
                         Email = item.Email
                     });
+                }
+                else
+                {
+                    var result = await gravatarAPI.Get(item.Email);
+                    if (result != null)
+                    {
+                        var user = new UserModel()
+                        {
+                            UserDisplayName = result.entry[0].displayName,
+                            UserImage = result.entry[0].thumbnailUrl,
+                            Email = item.Email
+                        };
+                        distinctObject.Add(user);
+                        cacheManagement.SetSingleCache(item.Email, user, 120);
+                    }
+                    else
+                    {
+                        var user = new UserModel()
+                        {
+                            UserDisplayName = "",
+                            UserImage = "",
+                            Email = item.Email
+                        };
+                        distinctObject.Add(user);
+                        cacheManagement.SetSingleCache(item.Email, user, 60);
+                    }
+                }
             }
 
             foreach (var item in input.Items)
@@ -94,6 +127,9 @@ namespace Todo.Controllers
                 if (distinctObject.Where
                     (x => x.Email == item.ResponsibleParty.UserName).Count() != 0)
                 {
+                    if (distinctObject.Where
+                    (x => x.Email == item.ResponsibleParty.UserName).FirstOrDefault().UserImage == "")
+                        continue;
                     item.UserDetail = distinctObject.Where
                     (x => x.Email == item.ResponsibleParty.UserName).FirstOrDefault();
                 }
