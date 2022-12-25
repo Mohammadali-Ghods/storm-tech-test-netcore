@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Todo.Models.TodoItems;
+using Todo.Services;
 
 namespace Todo.Models.TodoLists
 {
@@ -10,7 +12,6 @@ namespace Todo.Models.TodoLists
         public ICollection<TodoItemSummaryViewmodel> Items { get; }
         public bool HideDoneItems { get; set; }
         public bool OrderByRankAsc { get; set; }
-
         public TodoListDetailViewmodel(int todoListId, string title
             , ICollection<TodoItemSummaryViewmodel> items,
             bool hideDoneItems, bool orderByRankAsc)

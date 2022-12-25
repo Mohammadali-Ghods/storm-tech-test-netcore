@@ -1,4 +1,6 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -6,6 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using Todo.Data;
 using Todo.Data.Entities;
 using Todo.EntityModelMappers.TodoLists;
+using Todo.Interface;
+using Todo.Models;
 using Todo.Models.TodoLists;
 using Todo.Services;
 
@@ -16,11 +20,14 @@ namespace Todo.Controllers
     {
         private readonly ApplicationDbContext dbContext;
         private readonly IUserStore<IdentityUser> userStore;
+        private readonly IGravatarAPI gravatarAPI;
 
-        public TodoListController(ApplicationDbContext dbContext, IUserStore<IdentityUser> userStore)
+        public TodoListController(ApplicationDbContext dbContext, IUserStore<IdentityUser> userStore, IGravatarAPI gravatarAPI
+            )
         {
             this.dbContext = dbContext;
             this.userStore = userStore;
+            this.gravatarAPI = gravatarAPI;
         }
 
         public IActionResult Index()
@@ -32,14 +39,14 @@ namespace Todo.Controllers
         }
 
         [HttpGet]
-        public IActionResult Detail(int todoListId, bool hideDoneItems, bool orderByRankAsc, bool firstOne)
+        public async Task<IActionResult> Detail(int todoListId, bool hideDoneItems, bool orderByRankAsc, bool firstOne)
         {
             var todoList = dbContext.SingleTodoList(todoListId);
 
             if (!firstOne)
-                return View(TodoListDetailViewmodelFactory.Create(todoList, hideDoneItems, orderByRankAsc));
+                return View(await UpdateUsersDisplayNameAndImageWithGravatar(TodoListDetailViewmodelFactory.Create(todoList, hideDoneItems, orderByRankAsc)));
             else
-                return View(TodoListDetailViewmodelFactory.Create(todoList));
+                return View(await UpdateUsersDisplayNameAndImageWithGravatar(TodoListDetailViewmodelFactory.Create(todoList)));
         }
 
         [HttpGet]
@@ -62,6 +69,37 @@ namespace Todo.Controllers
             await dbContext.SaveChangesAsync();
 
             return RedirectToAction("Create", "TodoItem", new { todoList.TodoListId });
+        }
+
+        private async Task<TodoListDetailViewmodel> UpdateUsersDisplayNameAndImageWithGravatar(
+            TodoListDetailViewmodel input)
+        {
+            var distinctItems = input.Items.Select(x => x.ResponsibleParty).Distinct();
+            List<UserModel> distinctObject = new List<UserModel>();
+
+            foreach (var item in distinctItems)
+            {
+                var result = await gravatarAPI.Get(item.Email);
+                if (result != null)
+                    distinctObject.Add(new UserModel()
+                    {
+                        UserDisplayName = result.entry[0].displayName,
+                        UserImage = result.entry[0].thumbnailUrl,
+                        Email = item.Email
+                    });
+            }
+
+            foreach (var item in input.Items)
+            {
+                if (distinctObject.Where
+                    (x => x.Email == item.ResponsibleParty.UserName).Count() != 0)
+                {
+                    item.UserDetail = distinctObject.Where
+                    (x => x.Email == item.ResponsibleParty.UserName).FirstOrDefault();
+                }
+            }
+
+            return input;
         }
     }
 }

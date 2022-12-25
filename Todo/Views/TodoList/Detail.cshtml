@@ -81,12 +81,27 @@
                     </div>
 
                     <div class="col-md-4 text-right">
-                        <small>
-                            @item.ResponsibleParty.UserName
+                        @{
+                            if (item.UserDetail != null)
+                            {
+                                <small>
+                                    @item.UserDetail.UserDisplayName
 
-                            <img src="https://www.gravatar.com/avatar/@Gravatar.GetHash(item.ResponsibleParty.Email)?s=30" />
+                                    <img width="30" src="@item.UserDetail.UserImage" />
 
-                        </small>
+                                </small>
+                            }
+                            else
+                            {
+                                <small>
+                                    @item.ResponsibleParty.UserName
+
+                                    <img src="https://www.gravatar.com/avatar/@Gravatar.GetHash(item.ResponsibleParty.Email)?s=30" />
+
+                                </small>
+                            }
+                        }
+
                     </div>
                 </div>
 

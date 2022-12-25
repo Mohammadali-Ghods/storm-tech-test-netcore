@@ -25,13 +25,12 @@ namespace Todo.EntityModelMappers.TodoLists
                 items = todoList.Items.Where(x => x.IsDone == false).OrderByDescending(x => x.Rank).OrderBy(x => x.Importance).Select(TodoItemSummaryViewmodelFactory.Create).ToList();
 
             return new TodoListDetailViewmodel(todoList.TodoListId, todoList.Title, items, hideDoneItems, orderByRankAsc);
+
         }
         public static TodoListDetailViewmodel Create(TodoList todoList)
         {
             List<TodoItemSummaryViewmodel> items = null;
-
             items = todoList.Items.OrderBy(x => x.Importance).Select(TodoItemSummaryViewmodelFactory.Create).ToList();
-
             return new TodoListDetailViewmodel(todoList.TodoListId, todoList.Title, items, false, false);
         }
     }
