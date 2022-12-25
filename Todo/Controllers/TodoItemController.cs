@@ -67,7 +67,7 @@ namespace Todo.Controllers
 
         private RedirectToActionResult RedirectToListDetail(int fieldsTodoListId)
         {
-            return RedirectToAction("Detail", "TodoList", new {todoListId = fieldsTodoListId});
+            return RedirectToAction("Detail", "TodoList", new { todoListId = fieldsTodoListId, firstOne = true });
         }
     }
 }

@@ -5,6 +5,23 @@
 
 @{
     ViewData["Title"] = $"List: {Model.Title}";
+
+    string hideButtonText = "Hide Done Items";
+    bool doneFilterNextValue = true;
+    string orderByRankButtonText = "Order by Rank Descading";
+    bool rankOrderNextValue = true;
+
+    if (Model.HideDoneItems)
+    {
+        hideButtonText = "Show All Items";
+        doneFilterNextValue = false;
+    }
+
+    if (Model.OrderByRankAsc)
+    {
+        rankOrderNextValue = false;
+        orderByRankButtonText = "Order by Rank Asceding";
+    }
 }
 
 <h2>@ViewData["Title"]</h2>
@@ -14,13 +31,18 @@
     <ul class="list-group">
 
         <li class="list-group-item">
-            <a asp-action="Create" asp-controller="TodoItem" asp-route-todoListId="@Model.TodoListId">
+            <a asp-action="Create" asp-controller="TodoItem" asp-route-todoListId="@Model.TodoListId" asp-route-firstOne="true">
                 <strong>Add New Item</strong>
             </a>
         </li>
-         <li class="list-group-item">
-            <a asp-action="Detail" asp-controller="TodoList" asp-route-todoListId="@Model.TodoListId" asp-route-hideDoneItems="true">
-                <strong>Hide Done Items</strong>
+        <li class="list-group-item">
+            <a asp-action="Detail" asp-controller="TodoList" asp-route-todoListId="@Model.TodoListId" asp-route-hideDoneItems="@doneFilterNextValue" asp-route-orderByRankAsc="@Model.OrderByRankAsc" asp-route-firstOne="false">
+                <strong>@hideButtonText</strong>
+            </a>
+        </li>
+        <li class="list-group-item">
+            <a asp-action="Detail" asp-controller="TodoList" asp-route-todoListId="@Model.TodoListId" asp-route-hideDoneItems="@Model.HideDoneItems" asp-route-orderByRankAsc="@rankOrderNextValue" asp-route-firstOne="false">
+                <strong>@orderByRankButtonText</strong>
             </a>
         </li>
 

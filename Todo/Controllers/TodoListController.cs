@@ -32,11 +32,14 @@ namespace Todo.Controllers
         }
 
         [HttpGet]
-        public IActionResult Detail(int todoListId, bool hideDoneItems)
+        public IActionResult Detail(int todoListId, bool hideDoneItems, bool orderByRankAsc, bool firstOne)
         {
             var todoList = dbContext.SingleTodoList(todoListId);
-            var viewmodel = TodoListDetailViewmodelFactory.Create(todoList,hideDoneItems);
-            return View(viewmodel);
+
+            if (!firstOne)
+                return View(TodoListDetailViewmodelFactory.Create(todoList, hideDoneItems, orderByRankAsc));
+            else
+                return View(TodoListDetailViewmodelFactory.Create(todoList));
         }
 
         [HttpGet]
@@ -58,7 +61,7 @@ namespace Todo.Controllers
             await dbContext.AddAsync(todoList);
             await dbContext.SaveChangesAsync();
 
-            return RedirectToAction("Create", "TodoItem", new {todoList.TodoListId});
+            return RedirectToAction("Create", "TodoItem", new { todoList.TodoListId });
         }
     }
 }

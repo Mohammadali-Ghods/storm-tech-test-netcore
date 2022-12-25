@@ -21,13 +21,13 @@
                 @if (list.NumberOfNotDoneItems == 0)
                 {
                     <s>
-                        <a asp-action="Detail" asp-route-todoListId="@list.TodoListId">@list.Title</a>
+                        <a asp-action="Detail" asp-route-firstOne="true" asp-route-todoListId="@list.TodoListId">@list.Title</a>
                     </s>
                 }
                 else
                 {
                     <span class="badge">@list.NumberOfNotDoneItems</span>
-                    <a asp-action="Detail" asp-route-todoListId="@list.TodoListId">@list.Title</a>
+                    <a asp-action="Detail" asp-route-firstOne="true" asp-route-todoListId="@list.TodoListId">@list.Title</a>
                 }
             </li>
         }

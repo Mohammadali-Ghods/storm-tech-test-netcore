@@ -57,6 +57,12 @@
                 <span asp-validation-for="ResponsiblePartyId" class="text-danger"></span>
             </div>
 
+             <div class="form-group">
+                <label asp-for="Rank"></label>
+                <input asp-for="Rank" class="form-control" />
+                <span asp-validation-for="Rank" class="text-danger"></span>
+            </div>
+
             <div class="form-group">
                 <a asp-action="Detail" asp-controller="TodoList" asp-route-todoListId="@Model.TodoListId" class="btn btn-default">Cancel</a>
                 <button type="submit" class="btn btn-primary">Save</button>
