@@ -44,8 +44,6 @@ namespace Todo.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateByJs([FromBody] TodoItemCreateFields fields)
         {
-            if (!ModelState.IsValid) { return View(fields); }
-
             var item = new TodoItem(fields.TodoListId, fields.ResponsiblePartyId, fields.Title, fields.Importance);
 
             await dbContext.AddAsync(item);

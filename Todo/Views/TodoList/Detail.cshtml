@@ -1,11 +1,12 @@
 ﻿@using Todo.Controllers
+@using Todo.Data
 @using Todo.Data.Entities
 @using Todo.Services
 @model Todo.Models.TodoLists.TodoListDetailViewmodel
-
+@inject ApplicationDbContext dbContext
 @{
     ViewData["Title"] = $"List: {Model.Title}";
-
+    var users = dbContext.Users.ToList();
     string hideButtonText = "Hide Done Items";
     bool doneFilterNextValue = true;
     string orderByRankButtonText = "Order by Rank Descading";
@@ -24,11 +25,12 @@
     }
 }
 
+
 <h2>@ViewData["Title"]</h2>
 
 <div class="col-md-6">
 
-    <ul class="list-group">
+    <ul class="list-group" id="listitems">
 
         <li class="list-group-item">
             <a asp-action="Create" asp-controller="TodoItem" asp-route-todoListId="@Model.TodoListId" asp-route-firstOne="true">
@@ -108,9 +110,9 @@
             </li>
         }
     </ul>
-    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#myModal">
-            Add New Item
-        </button>
+    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#myModal">
+        Add New Item
+    </button>
 </div>
 
 <div class="modal" id="myModal">
@@ -125,15 +127,38 @@
 
             <!-- Modal body -->
             <div class="modal-body">
-                
-            </div>
 
-            <!-- Modal footer -->
-            <div class="modal-footer">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input id="title" class="form-control" />
+                </div>
+
+                <div class="form-group">
+                    <label>Important</label>
+                    <select id="important">
+                        <option></option>
+                        <option value="0">High</option>
+                        <option value="1">Medium</option>
+                        <option value="2">Low</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Assign to</label>
+                    <select id="assignto">
+                        <option></option>
+                        @{
+                            foreach (var user in users)
+                            {
+                                <option value="@user.Id">@user.UserName</option>
+                            }
+                        }
+                    </select>
+                </div>
                 <button type="button" class="btn btn-success" data-dismiss="modal">Close</button>
-                 <button type="button" onclick="AddNewItem(2);" class="btn btn-primary">Add new item</button>
+                <button type="button" onclick="AddNewItem(@Model.TodoListId, document.getElementById('title').value,'', document.getElementById('assignto').value, document.getElementById('important').value);" class="btn btn-primary">Add new item</button>
             </div>
-
         </div>
     </div>
+</div>
 </div>
